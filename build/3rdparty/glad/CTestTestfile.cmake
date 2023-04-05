@@ -1,0 +1,6 @@
+# CMake generated Testfile for 
+# Source directory: /home/santiego/proj/CG/rockcore/cg_solve/3rdparty/glad
+# Build directory: /home/santiego/proj/CG/rockcore/cg_solve/build/3rdparty/glad
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.

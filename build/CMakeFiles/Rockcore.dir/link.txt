@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/Rockcore.dir/shader_obj.cpp.o -o Rockcore  /usr/local/lib/libglfw3.a 3dparty/glad/libglad.a -Wl,-Bstatic -lrt -Wl,-Bdynamic -lm -ldl -lX11 
