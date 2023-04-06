@@ -23,8 +23,10 @@ int main(int argc, char** argv){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    
+    const int screen_width = 800, screen_height = 600;
  
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(screen_width, screen_height, "LearnOpenGL", NULL, NULL);
     if(window==NULL){
         printf("Failed to create Window\n");
         glfwTerminate();
@@ -61,38 +63,7 @@ int main(int argc, char** argv){
         1, 2, 3  // 2nd Triangle
     };
 
-    // Vertex Array
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    
-    glBindVertexArray(VAO);
-
-    // Vertex Buffer 
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-
-    // Element Buffer
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6*sizeof(float)));
-    glEnableVertexAttribArray(2);
-    
-    glBindVertexArray(0);
-
+    vertex_array_obj VAO(4, {3, 3, 2}, vertices, 6, indices, GL_STATIC_DRAW, GL_TRIANGLES);
 
     // wire frame polygons
     //`glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -128,24 +99,26 @@ int main(int argc, char** argv){
         texture2.blind(1);
 
         shader.use();
-        // create transformations
-        glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        shader.setMatrix4f("transform", transform);
+        glm::mat4 model(1.0f);
+        //model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        glm::mat4 view(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        glm::mat4 projection(1.0f);
+        projection = glm::perspective(glm::radians(45.0f), screen_width *1.0f / screen_height, 0.1f, 100.0f);
+        shader.setMatrix4f(KEY_VAL(model));
+        shader.setMatrix4f(KEY_VAL(view));
+        shader.setMatrix4f(KEY_VAL(projection));
+        
 
-        glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        VAO.draw_element(GL_TRIANGLES, 6);
 
         // check event and swap buffer
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
     // release resources
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    
     
 
     glfwTerminate();

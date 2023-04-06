@@ -6,15 +6,19 @@
 #include <stdio.h>
 #include <math.h>
 #include <glm/glm.hpp>
+#include <initializer_list>
+
+
+#define KEY_VAL(X) #X,X 
 
 class texture_obj;
 
 class shader_obj{
     public:
-        shader_obj(const char* vertex_shader_path, const char* fragment_shader_path);
         unsigned int program_id, vertex_id, fragment_id;
+
+        shader_obj(const char* vertex_shader_path, const char* fragment_shader_path);
         void use();
-        
         void setBool(const char* key, bool val) const;
         void setInt(const char* key, int val) const;
         void setFloat(const char* key, float val) const;
@@ -28,9 +32,31 @@ class shader_obj{
 
 class texture_obj{
     public:
-        texture_obj(const char* file_name, GLenum color_format);
         unsigned int texture_id;
+
+        texture_obj(const char* file_name, GLenum color_format);
         // remember to use the shader at first
         void blind(unsigned int pos);
         
+};
+
+class vertex_array_obj{
+    public:
+        // Vertex Array ID
+        unsigned int VAO_id;
+        // Vertex Buffer ID
+        unsigned int VBO_id;
+        // Element Buffer
+        unsigned int EBO_id;
+        // Vertex number
+        unsigned int v_cnt;
+        // Element number
+        unsigned int e_cnt;
+
+        vertex_array_obj(unsigned int vertex_num, std::initializer_list<unsigned int> vertex_div, float* vertex_data,
+                            unsigned int element_num, unsigned int* element_data, 
+                            GLenum buffer_usage, GLenum draw_type);
+        ~vertex_array_obj();
+        void draw_array(GLenum draw_mode, int beg, int num);
+        void draw_element(GLenum draw_mode, int num);
 };

@@ -135,3 +135,61 @@ void texture_obj::blind(unsigned int pos){
     glActiveTexture(GL_TEXTURE0+pos);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 }
+
+vertex_array_obj::vertex_array_obj(unsigned int vertex_num, std::initializer_list<unsigned int> vertex_div, float* vertex_data,
+                            unsigned int element_num, unsigned int* element_data, 
+                            GLenum buffer_usage, GLenum draw_type){
+
+    v_cnt = vertex_num;
+    e_cnt = element_num;
+    unsigned int vertex_per_size = 0;
+    for(const unsigned int &item : vertex_div)
+        vertex_per_size += item;
+    // Vertex Array
+    glGenVertexArrays(1, &VAO_id);
+    
+    glBindVertexArray(VAO_id);
+
+    // Vertex Buffer 
+    glGenBuffers(1, &VBO_id);
+
+    // Element Buffer
+    if(element_num != 0)
+        glGenBuffers(1, &EBO_id);
+        
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertex_per_size*vertex_num, vertex_data, buffer_usage);
+
+    if(element_num != 0){
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_id);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*element_num, element_data, buffer_usage);
+    }
+
+    int i=0, j=0;
+    for(const unsigned int &item : vertex_div){
+        glVertexAttribPointer(i, item, GL_FLOAT, GL_FALSE, vertex_per_size*sizeof(float), (void*)(j*sizeof(float)));
+        glEnableVertexAttribArray(i);
+        i+=1;
+        j+=item;
+    }
+    
+    glBindVertexArray(0);
+
+}
+
+vertex_array_obj::~vertex_array_obj(){
+    glDeleteVertexArrays(1, &VAO_id);
+    glDeleteBuffers(1, &VBO_id);
+    glDeleteBuffers(1, &EBO_id);
+}
+
+void vertex_array_obj::draw_array(GLenum draw_mode, int beg, int num){
+    glBindVertexArray(VAO_id);
+    glDrawArrays(draw_mode, beg, num);
+}
+
+void vertex_array_obj::draw_element(GLenum draw_mode, int num){
+    glBindVertexArray(VAO_id);
+    glDrawElements(draw_mode, num, GL_UNSIGNED_INT, 0);
+}
