@@ -40,30 +40,75 @@ int main(int argc, char** argv){
         return -1;
     }
 
+
     shader_obj shader("../vertex.vs", "../fragment.fs");
     texture_obj texture1("../resource/container.jpg", GL_RGB);
     texture_obj texture2("../resource/awesomeface.png", GL_RGBA);
     
 
-    // vertex data
+    // // vertex data
+    // float vertices[] = {
+    //     // position         // color            // texture
+    //     // top right        // red              // top right
+    //     0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+    //     // bot right        // green            // bot right
+    //     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+    //     // bot left         // blue             // bot left
+    //     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 
+    //     // top left         // white            // top left
+    //     -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+    // };
+    // // 
+    // unsigned int indices[] = {
+    //     0, 2, 3, // 1st Triangle
+    //     1, 2, 3  // 2nd Triangle
+    // };
+
     float vertices[] = {
-        // position         // color            // texture
-        // top right        // red              // top right
-        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-        // bot right        // green            // bot right
-        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-        // bot left         // blue             // bot left
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 
-        // top left         // white            // top left
-        -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-    };
-    // 
-    unsigned int indices[] = {
-        0, 2, 3, // 1st Triangle
-        1, 2, 3  // 2nd Triangle
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    vertex_array_obj VAO(4, {3, 3, 2}, vertices, 6, indices, GL_STATIC_DRAW, GL_TRIANGLES);
+    vertex_array_obj VAO(36, {3, 2}, vertices, 0, NULL, GL_STATIC_DRAW);
 
     // wire frame polygons
     //`glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -73,11 +118,20 @@ int main(int argc, char** argv){
     shader.blind_texture("Tex1", 0);
     shader.blind_texture("Tex2", 1);
 
-    // glm::mat4 trans(1.0f);
-    // trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-    // shader.setMatrix4f("transform", trans);
+    glEnable(GL_DEPTH_TEST);
     
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f), 
+        glm::vec3( 2.0f,  5.0f, -15.0f), 
+        glm::vec3(-1.5f, -2.2f, -2.5f),  
+        glm::vec3(-3.8f, -2.0f, -12.3f),  
+        glm::vec3( 2.4f, -0.4f, -3.5f),  
+        glm::vec3(-1.7f,  3.0f, -7.5f),  
+        glm::vec3( 1.3f, -2.0f, -2.5f),  
+        glm::vec3( 1.5f,  2.0f, -2.5f), 
+        glm::vec3( 1.5f,  0.2f, -1.5f), 
+        glm::vec3(-1.3f,  1.0f, -1.5f)  
+    };
 
     // Render loop
     while(!glfwWindowShouldClose(window)){
@@ -86,7 +140,7 @@ int main(int argc, char** argv){
 
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
         
         // draw vertex
         /*
@@ -101,7 +155,6 @@ int main(int argc, char** argv){
         shader.use();
         glm::mat4 model(1.0f);
         //model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
         glm::mat4 view(1.0f);
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         glm::mat4 projection(1.0f);
@@ -111,7 +164,18 @@ int main(int argc, char** argv){
         shader.setMatrix4f(KEY_VAL(projection));
         
 
-        VAO.draw_element(GL_TRIANGLES, 6);
+        //VAO.draw_element(GL_TRIANGLES, 6);
+        
+        for(unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            //float angle = 20.0f * i; 
+            //model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+            shader.setMatrix4f(KEY_VAL(model));
+            VAO.draw_array(GL_TRIANGLES, 0, 36);
+        }
 
         // check event and swap buffer
         glfwPollEvents();

@@ -55,7 +55,7 @@ class vertex_array_obj{
 
         vertex_array_obj(unsigned int vertex_num, std::initializer_list<unsigned int> vertex_div, float* vertex_data,
                             unsigned int element_num, unsigned int* element_data, 
-                            GLenum buffer_usage, GLenum draw_type);
+                            GLenum buffer_usage);
         ~vertex_array_obj();
         void draw_array(GLenum draw_mode, int beg, int num);
         void draw_element(GLenum draw_mode, int num);

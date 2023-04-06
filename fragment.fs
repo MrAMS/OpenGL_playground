@@ -1,7 +1,8 @@
 #version 330 core
 out vec4 FragColor;
-in vec3 col;
+
 in vec2 TexCoord;
+
 uniform sampler2D Tex1;
 uniform sampler2D Tex2;
 void main()

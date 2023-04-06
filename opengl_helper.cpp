@@ -138,7 +138,7 @@ void texture_obj::blind(unsigned int pos){
 
 vertex_array_obj::vertex_array_obj(unsigned int vertex_num, std::initializer_list<unsigned int> vertex_div, float* vertex_data,
                             unsigned int element_num, unsigned int* element_data, 
-                            GLenum buffer_usage, GLenum draw_type){
+                            GLenum buffer_usage){
 
     v_cnt = vertex_num;
     e_cnt = element_num;
