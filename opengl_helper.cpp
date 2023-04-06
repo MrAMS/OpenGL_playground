@@ -181,7 +181,8 @@ vertex_array_obj::vertex_array_obj(unsigned int vertex_num, std::initializer_lis
 vertex_array_obj::~vertex_array_obj(){
     glDeleteVertexArrays(1, &VAO_id);
     glDeleteBuffers(1, &VBO_id);
-    glDeleteBuffers(1, &EBO_id);
+    if(e_cnt != 0)
+        glDeleteBuffers(1, &EBO_id);
 }
 
 void vertex_array_obj::draw_array(GLenum draw_mode, int beg, int num){
@@ -190,6 +191,10 @@ void vertex_array_obj::draw_array(GLenum draw_mode, int beg, int num){
 }
 
 void vertex_array_obj::draw_element(GLenum draw_mode, int num){
+    if(e_cnt == 0){
+        printf("[Draw ERROR]\n No available element buffer to draw\n");
+        return;
+    }
     glBindVertexArray(VAO_id);
     glDrawElements(draw_mode, num, GL_UNSIGNED_INT, 0);
 }
