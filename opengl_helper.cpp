@@ -62,25 +62,44 @@ void shader_obj::use(){
     glUseProgram(program_id);
 }
 
-void shader_obj::setBool(const char* key, bool val) const{
-    setInt(key, (int)val);
+int shader_obj::get_uniform_loc(const char* key) const{
+    return glGetUniformLocation(program_id, key);
+}
+void shader_obj::set_bool(const char* key, bool val) const{
+    set_int(key, (int)val);
 }
 
-void shader_obj::setInt(const char* key, int val) const{
-    glUniform1i(glGetUniformLocation(program_id, key), val);
+void shader_obj::set_int(const char* key, int val) const{
+    glUniform1i(get_uniform_loc(key), val);
 }
 
-void shader_obj::setFloat(const char* key, float val) const{
-    glUniform1f(glGetUniformLocation(program_id, key), val); 
+void shader_obj::set_float(const char* key, float val) const{
+    glUniform1f(get_uniform_loc(key), val); 
 }
 
-void shader_obj::setMatrix4f(const char* key, glm::mat4 mat) const{
-    glUniformMatrix4fv(glGetUniformLocation(program_id, key), 1, GL_FALSE, glm::value_ptr(mat));
+void shader_obj::set_matrix(const char* key, const glm::mat4 &mat) const{
+    glUniformMatrix4fv(get_uniform_loc(key), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void shader_obj::set_vec(const char* key, const glm::vec3 &val) const{
+    glUniform3fv(get_uniform_loc(key), 1, &val[0]); 
+}
+
+void shader_obj::set_vec(const char* key, const float x, const float y, const float z) const{
+    glUniform3f(get_uniform_loc(key), x, y, z);
+}
+
+void shader_obj::set_vec(const char* key, const glm::vec4 &val) const{
+    glUniform4fv(get_uniform_loc(key), 1, &val[0]); 
+}
+
+void shader_obj::set_vec(const char* key, const float x, const float y, const float z, const float w) const{
+    glUniform4f(get_uniform_loc(key), x, y, z, w);
 }
 
 void shader_obj::blind_texture(const char* key, unsigned int pos){
     use();
-    setInt(key, pos);
+    set_int(key, pos);
 }
 
 void shader_obj::check_compile_errors(unsigned int shader, const char* type)
@@ -222,9 +241,9 @@ void camera_obj::calc_projection(){
 }
 
 void camera_obj::update_shader_uniform(const shader_obj& shader, const char* view_key, const char* proj_key, const char* model_key){
-    shader.setMatrix4f(view_key, view);
-    shader.setMatrix4f(proj_key, projection);
-    shader.setMatrix4f(model_key, model);
+    shader.set_matrix(view_key, view);
+    shader.set_matrix(proj_key, projection);
+    shader.set_matrix(model_key, model);
 }
 
 void camera_obj::change_pos(enum dir move_dir, float step){

@@ -19,11 +19,18 @@ class shader_obj{
 
         shader_obj(const char* vertex_shader_path, const char* fragment_shader_path);
         void use();
-        void setBool(const char* key, bool val) const;
-        void setInt(const char* key, int val) const;
-        void setFloat(const char* key, float val) const;
-        void setMatrix4f(const char* key, glm::mat4 mat) const;
         void blind_texture(const char* key, unsigned int pos);
+
+        int get_uniform_loc(const char* key) const;
+        void set_bool(const char* key, bool val) const;
+        void set_int(const char* key, int val) const;
+        void set_float(const char* key, float val) const;
+        void set_matrix(const char* key, const glm::mat4 &mat) const;
+        void set_vec(const char* key, const glm::vec3 &val) const;
+        void set_vec(const char* key, const float x, const float y, const float z) const;
+        void set_vec(const char* key, const glm::vec4 &val) const;
+        void set_vec(const char* key, const float x, const float y, const float z, const float w) const;
+        
         ~shader_obj();
     private:
         // utility function for checking shader compilation/linking errors.

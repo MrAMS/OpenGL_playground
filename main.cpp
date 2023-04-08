@@ -66,6 +66,8 @@ int main(int argc, char** argv){
     }
 
     shader_obj shader("../vertex.vs", "../fragment.fs");
+    shader_obj shader_light("../light.vs", "../light.fs");
+
     texture_obj texture1("../resource/container.jpg", GL_RGB);
     texture_obj texture2("../resource/awesomeface.png", GL_RGBA);
     
@@ -132,13 +134,63 @@ int main(int argc, char** argv){
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    float vertices_cube[] = {
+        -0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+        -0.5f,  0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+
+        -0.5f, -0.5f,  0.5f, 
+         0.5f, -0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f, -0.5f,  0.5f, 
+
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f,  0.5f, 
+        -0.5f,  0.5f,  0.5f, 
+
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+
+        -0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f,  0.5f,  
+         0.5f, -0.5f,  0.5f,  
+        -0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+
+        -0.5f,  0.5f, -0.5f, 
+         0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f, -0.5f, 
+    };
+
     vertex_array_obj VAO(36, {3, 2}, vertices, 0, NULL, GL_STATIC_DRAW);
+    vertex_array_obj VAO_light(36, {3}, vertices_cube, 0, NULL, GL_STATIC_DRAW);
 
     // wire frame polygons
     //`glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    shader_light.use();
+    shader_light.set_vec("objectColor", 1.0f, 0.5f, 0.31f);
+    shader_light.set_vec("lightColor",  1.0f, 1.0f, 1.0f);
+
     shader.use();
-    
+    texture1.blind(0);
+    texture2.blind(1);
     shader.blind_texture("Tex1", 0);
     shader.blind_texture("Tex2", 1);
 
@@ -177,10 +229,7 @@ int main(int argc, char** argv){
         glUseProgram(shaderProgram);
         glUniform4f(uniform_loc, 0.0f, val, 0.0f, 1.0f);
         */
-        texture1.blind(0);
-        texture2.blind(1);
-
-        shader.use();
+        
         camera.calc_projection();
         camera.calc_view();
         
@@ -200,6 +249,9 @@ int main(int argc, char** argv){
             
             VAO.draw_array(GL_TRIANGLES, 0, 36);
         }
+
+        VAO_light.draw_array(GL_TRIANGLES, 0, 36);
+
 
         // check event and swap buffer
         glfwPollEvents();
