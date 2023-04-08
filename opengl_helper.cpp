@@ -108,7 +108,7 @@ void shader_obj::check_compile_errors(unsigned int shader, const char* type)
 }    
 
 shader_obj::~shader_obj(){
-    glDeleteProgram(program_id);
+    //glDeleteProgram(program_id);
 }
 
 texture_obj::texture_obj(const char* file_name, GLenum color_format){
@@ -179,10 +179,12 @@ vertex_array_obj::vertex_array_obj(unsigned int vertex_num, std::initializer_lis
 }
 
 vertex_array_obj::~vertex_array_obj(){
+    /*
     glDeleteVertexArrays(1, &VAO_id);
     glDeleteBuffers(1, &VBO_id);
     if(e_cnt != 0)
         glDeleteBuffers(1, &EBO_id);
+    */
 }
 
 void vertex_array_obj::draw_array(GLenum draw_mode, int beg, int num){
@@ -197,4 +199,95 @@ void vertex_array_obj::draw_element(GLenum draw_mode, int num){
     }
     glBindVertexArray(VAO_id);
     glDrawElements(draw_mode, num, GL_UNSIGNED_INT, 0);
+}
+
+camera_obj::camera_obj(float screen_w_div_h_, glm::vec3 position_,
+                    glm::vec3 up_, float yaw_, float pitch_,
+                    float sensitivity_, float fov_, float max_fov_)
+                    :screen_w_div_h(screen_w_div_h_), position(position_), up(up_), yaw(yaw_), pitch(pitch_), sensitivity(sensitivity_), fov(fov_), max_fov(max_fov_){
+    
+    front = glm::vec3(0.0f, 0.0f, -1.0f);
+
+    calc_projection();
+    calc_view();
+    model = glm::mat4(1.0f);
+}
+
+void camera_obj::calc_view(){
+    view = glm::lookAt(position, position + front, up);
+}
+
+void camera_obj::calc_projection(){
+    projection = glm::perspective(glm::radians(fov), screen_w_div_h, 0.1f, 100.0f);
+}
+
+void camera_obj::update_shader_uniform(const shader_obj& shader, const char* view_key, const char* proj_key, const char* model_key){
+    shader.setMatrix4f(view_key, view);
+    shader.setMatrix4f(proj_key, projection);
+    shader.setMatrix4f(model_key, model);
+}
+
+void camera_obj::change_pos(enum dir move_dir, float step){
+    if (move_dir == UP)
+        position += step * front;
+    if (move_dir == DOWN)
+        position -= step * front;
+    if (move_dir == LEFT)
+        position -= glm::normalize(glm::cross(front, up)) * step;
+    if (move_dir == RIGHT)
+        position += glm::normalize(glm::cross(front, up)) * step;
+}
+
+void camera_obj::change_pitch_yaw(float x_offset, float y_offset){
+    yaw   += x_offset;
+    pitch += y_offset;
+
+    if(pitch > 89.0f)
+        pitch = 89.0f;
+    if(pitch < -89.0f)
+        pitch = -89.0f;
+
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front = glm::normalize(front);
+}
+
+void camera_obj::change_fov(float target_fov){
+    fov = target_fov;
+}
+
+void camera_obj::input_pos(enum dir move_dir, float delta_time){
+    float speed = static_cast<float>(2.5 * delta_time);
+    change_pos(move_dir, speed);
+}
+
+void camera_obj::input_pitch_yaw(double cur_x, double cur_y){
+    static bool is_first = true;
+    static float last_x, last_y;
+    if(is_first)
+    {
+        last_x = cur_x;
+        last_y = cur_y;
+        is_first = false;
+    }
+
+    float xoffset = cur_x - last_x;
+    float yoffset = last_y - cur_y; 
+    last_x = cur_x;
+    last_y = cur_y;
+
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    change_pitch_yaw(xoffset, yoffset);
+}
+
+void camera_obj::input_fov(double scroll){
+    if(fov >= 1.0f && fov <= max_fov)
+        fov -= scroll;
+    if(fov <= 1.0f)
+        fov = 1.0f;
+    if(fov >= max_fov)
+        fov = max_fov;
 }

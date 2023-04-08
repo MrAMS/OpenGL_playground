@@ -4,6 +4,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+const int screen_width = 800, screen_height = 600;
+
+float deltaTime = 0.0f;	// time between current frame and last frame
+float lastFrame = 0.0f;
+
+camera_obj camera(screen_width*1.0f/screen_height);
 
 void framebuffer_size_callback(GLFWwindow* win, int w, int h){
     glViewport(0, 0, w, h);
@@ -14,17 +20,34 @@ void processInput(GLFWwindow* window){
         glfwSetWindowShouldClose(window, true);
         printf("You have pressed ESE\n");
     }
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.input_pos(camera_obj::UP, deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.input_pos(camera_obj::DOWN, deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.input_pos(camera_obj::RIGHT, deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.input_pos(camera_obj::LEFT, deltaTime);
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+    camera.input_pitch_yaw(xpos, ypos);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.input_fov(yoffset);
+}
 
 int main(int argc, char** argv){
 	printf("hello OpenGL\n");
+    
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    const int screen_width = 800, screen_height = 600;
+    
  
     GLFWwindow* window = glfwCreateWindow(screen_width, screen_height, "LearnOpenGL", NULL, NULL);
     if(window==NULL){
@@ -34,12 +57,13 @@ int main(int argc, char** argv){
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
         printf("Failed to init GLAD\n");
         return -1;
     }
-
 
     shader_obj shader("../vertex.vs", "../fragment.fs");
     texture_obj texture1("../resource/container.jpg", GL_RGB);
@@ -135,6 +159,10 @@ int main(int argc, char** argv){
 
     // Render loop
     while(!glfwWindowShouldClose(window)){
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         // key event
         processInput(window);
 
@@ -153,15 +181,8 @@ int main(int argc, char** argv){
         texture2.blind(1);
 
         shader.use();
-        glm::mat4 model(1.0f);
-        //model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        glm::mat4 view(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        glm::mat4 projection(1.0f);
-        projection = glm::perspective(glm::radians(45.0f), screen_width *1.0f / screen_height, 0.1f, 100.0f);
-        shader.setMatrix4f(KEY_VAL(model));
-        shader.setMatrix4f(KEY_VAL(view));
-        shader.setMatrix4f(KEY_VAL(projection));
+        camera.calc_projection();
+        camera.calc_view();
         
 
         //VAO.draw_element(GL_TRIANGLES, 6);
@@ -173,7 +194,10 @@ int main(int argc, char** argv){
             //float angle = 20.0f * i; 
             //model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-            shader.setMatrix4f(KEY_VAL(model));
+            camera.model = model;
+
+            camera.update_shader_uniform(shader, "view", "projection", "model");
+            
             VAO.draw_array(GL_TRIANGLES, 0, 36);
         }
 
@@ -182,8 +206,6 @@ int main(int argc, char** argv){
         glfwSwapBuffers(window);
     }
     // release resources
-    
-    
 
     glfwTerminate();
     return 0;

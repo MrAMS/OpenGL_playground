@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/rockcore.dir/opengl_helper.cpp.o CMakeFiles/rockcore.dir/main.cpp.o -o rockcore  /usr/local/lib/libglfw3.a 3rdparty/glad/libglad.a -Wl,-Bstatic -lrt -Wl,-Bdynamic -lm -ldl -lX11 
