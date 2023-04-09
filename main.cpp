@@ -4,12 +4,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-const int screen_width = 800, screen_height = 600;
+const int screen_width = 1200, screen_height = 600;
 
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 camera_obj camera(screen_width*1.0f/screen_height);
+
+// lighting
+glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
+
 
 void framebuffer_size_callback(GLFWwindow* win, int w, int h){
     glViewport(0, 0, w, h);
@@ -65,30 +69,13 @@ int main(int argc, char** argv){
         return -1;
     }
 
-    shader_obj shader("../vertex.vs", "../fragment.fs");
-    shader_obj shader_light("../light.vs", "../light.fs");
+    //shader_obj shader("../vertex.vs", "../fragment.fs");
+    shader_obj shader_light("../light_basic.vs", "../light_basic.fs");
+    shader_obj shader_cube("../cube.vs", "../cube.fs");
 
     texture_obj texture1("../resource/container.jpg", GL_RGB);
     texture_obj texture2("../resource/awesomeface.png", GL_RGBA);
     
-
-    // // vertex data
-    // float vertices[] = {
-    //     // position         // color            // texture
-    //     // top right        // red              // top right
-    //     0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-    //     // bot right        // green            // bot right
-    //     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-    //     // bot left         // blue             // bot left
-    //     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 
-    //     // top left         // white            // top left
-    //     -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-    // };
-    // // 
-    // unsigned int indices[] = {
-    //     0, 2, 3, // 1st Triangle
-    //     1, 2, 3  // 2nd Triangle
-    // };
 
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -178,36 +165,66 @@ int main(int argc, char** argv){
         -0.5f,  0.5f, -0.5f, 
     };
 
-    vertex_array_obj VAO(36, {3, 2}, vertices, 0, NULL, GL_STATIC_DRAW);
-    vertex_array_obj VAO_light(36, {3}, vertices_cube, 0, NULL, GL_STATIC_DRAW);
+    float vertices_cube_with_normal[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    };
+
+    vertex_array_obj vao_cube(36, {3}, vertices_cube, 0, NULL, GL_STATIC_DRAW);
+    vertex_array_obj vao_with_light(36, {3,3}, vertices_cube_with_normal, 0, NULL, GL_STATIC_DRAW);
 
     // wire frame polygons
     //`glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    shader_light.use();
-    shader_light.set_vec("objectColor", 1.0f, 0.5f, 0.31f);
-    shader_light.set_vec("lightColor",  1.0f, 1.0f, 1.0f);
 
-    shader.use();
-    texture1.blind(0);
-    texture2.blind(1);
-    shader.blind_texture("Tex1", 0);
-    shader.blind_texture("Tex2", 1);
+
+    shader_light.use();
+    shader_light.set_vec("object_col", 1.0f, 0.5f, 0.31f);
+    shader_light.set_vec("light_col",  1.0f, 1.0f, 1.0f);
+    shader_light.set_vec("light_pos",  light_pos);
+
+
 
     glEnable(GL_DEPTH_TEST);
-    
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f), 
-        glm::vec3( 2.0f,  5.0f, -15.0f), 
-        glm::vec3(-1.5f, -2.2f, -2.5f),  
-        glm::vec3(-3.8f, -2.0f, -12.3f),  
-        glm::vec3( 2.4f, -0.4f, -3.5f),  
-        glm::vec3(-1.7f,  3.0f, -7.5f),  
-        glm::vec3( 1.3f, -2.0f, -2.5f),  
-        glm::vec3( 1.5f,  2.0f, -2.5f), 
-        glm::vec3( 1.5f,  0.2f, -1.5f), 
-        glm::vec3(-1.3f,  1.0f, -1.5f)  
-    };
 
     // Render loop
     while(!glfwWindowShouldClose(window)){
@@ -222,35 +239,21 @@ int main(int argc, char** argv){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
         
-        // draw vertex
-        /*
-        float val = sin(glfwGetTime())/2.0+0.5f;
-        int uniform_loc = glGetUniformLocation(shaderProgram, "col");
-        glUseProgram(shaderProgram);
-        glUniform4f(uniform_loc, 0.0f, val, 0.0f, 1.0f);
-        */
-        
         camera.calc_projection();
         camera.calc_view();
+        camera.model = glm::mat4(1.0f);
+
+        shader_light.use();
+        camera.update_shader_uniform(shader_light, "view", "projection", "model");
+        vao_with_light.draw_array(GL_TRIANGLES, 0, 36);
+
+        shader_cube.use();
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), light_pos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        camera.model = model;
+        camera.update_shader_uniform(shader_cube, "view", "projection", "model");
+        vao_cube.draw_array(GL_TRIANGLES, 0, 36);
         
-
-        //VAO.draw_element(GL_TRIANGLES, 6);
-        
-        for(unsigned int i = 0; i < 10; i++)
-        {
-            glm::mat4 model(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            //float angle = 20.0f * i; 
-            //model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-            camera.model = model;
-
-            camera.update_shader_uniform(shader, "view", "projection", "model");
-            
-            VAO.draw_array(GL_TRIANGLES, 0, 36);
-        }
-
-        VAO_light.draw_array(GL_TRIANGLES, 0, 36);
 
 
         // check event and swap buffer
